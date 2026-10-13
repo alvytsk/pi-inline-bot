@@ -95,12 +95,14 @@ class Bot:
     def on_chosen(self, r):
         if r["from"]["id"] not in self.allowed or "inline_message_id" not in r:
             return
-        threading.Thread(target=self.answer, args=(r["inline_message_id"], r["query"].strip()),
+        threading.Thread(target=self.answer,
+                         args=(r["inline_message_id"], r["query"].strip(), r["from"]["id"]),
                          daemon=True).start()
 
-    def answer(self, message_id, query):
+    def answer(self, message_id, query, user_id):
         with self.jobs:
-            log.info("asking pi: %r", query)
+            # The query itself stays out of the log; only who asked and how much.
+            log.info("asking pi for user id=%s (%d chars)", user_id, len(query))
             text = format_answer(query, self.run_pi(query))
         try:
             self.call("editMessageText", inline_message_id=message_id, text=text)

@@ -77,5 +77,17 @@ class PollTest(unittest.TestCase):
         self.assertGreater(urlopen.call_args.kwargs["timeout"], body["timeout"])
 
 
+class AnswerLogTest(unittest.TestCase):
+    def test_log_has_user_id_but_not_the_query(self):
+        b = bot.Bot("T", set(), "pi", [], 1, "/", 1)
+        with mock.patch.object(b, "run_pi", return_value="ok"), mock.patch.object(b, "call"), \
+                self.assertLogs(bot.log, "INFO") as logs:
+            b.answer("msg", "my secret question", 881848941)
+        out = "\n".join(logs.output)
+        self.assertIn("user id=881848941", out)
+        self.assertIn("(18 chars)", out)
+        self.assertNotIn("secret", out)
+
+
 if __name__ == "__main__":
     unittest.main()
