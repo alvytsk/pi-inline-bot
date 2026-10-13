@@ -1,0 +1,21 @@
+# Template unit: the instance name is the user the bot runs as, and the
+# checkout is expected at /home/<user>/pi-inline-bot.
+#   sudo cp pi-inline-bot@.service /etc/systemd/system/
+#   sudo systemctl enable --now pi-inline-bot@$USER
+[Unit]
+Description=Telegram inline bot answering with pi (%i)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=%i
+WorkingDirectory=/home/%i/pi-inline-bot
+EnvironmentFile=/home/%i/pi-inline-bot/bot.env
+Environment=PATH=/home/%i/.bun/bin:/home/%i/.local/bin:/usr/local/bin:/usr/bin:/bin
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/usr/bin/python3 /home/%i/pi-inline-bot/bot.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
