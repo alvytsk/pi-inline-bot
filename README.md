@@ -73,6 +73,7 @@ All settings come from environment variables (see `bot.env.example`):
 | `PI_TIMEOUT`    | `180`                                     | Seconds before pi is killed               |
 | `PI_CWD`        | `$HOME`                                   | Working directory for pi                  |
 | `PI_MAX_JOBS`   | `2`                                       | Max concurrent pi runs                    |
+| `ASSISTANT_NAME` | `pi`                                    | Name in "Ask <name>" and "<name> is thinking…" |
 
 ## Security
 

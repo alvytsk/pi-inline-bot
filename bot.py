@@ -33,15 +33,15 @@ def parse_allowed(raw):
     return {int(x) for x in raw.replace(",", " ").split()}
 
 
-def inline_result(query):
+def inline_result(query, name="pi"):
     return {
         "type": "article",
         "id": hashlib.sha1(query.encode()).hexdigest(),
-        "title": "Ask pi",
+        "title": f"Ask {name}",
         "description": query,
         "input_message_content": {"message_text": f"{Q_ICON} {query}\n\n{PI_ICON} thinking…"},
         "reply_markup": {
-            "inline_keyboard": [[{"text": f"{PI_ICON} pi is thinking…", "callback_data": "wait"}]]
+            "inline_keyboard": [[{"text": f"{PI_ICON} {name} is thinking…", "callback_data": "wait"}]]
         },
     }
 
@@ -59,8 +59,9 @@ def pi_command(pi_bin, pi_args, query):
 
 
 class Bot:
-    def __init__(self, token, allowed, pi_bin, pi_args, pi_timeout, pi_cwd, max_jobs):
+    def __init__(self, token, allowed, pi_bin, pi_args, pi_timeout, pi_cwd, max_jobs, name="pi"):
         self.api = f"https://api.telegram.org/bot{token}/"
+        self.name = name
         self.allowed = allowed
         self.pi_bin = pi_bin
         self.pi_args = pi_args
@@ -87,7 +88,7 @@ class Bot:
             log.warning("rejected inline query from user id=%s (@%s)", user["id"], user.get("username"))
             results = []
         else:
-            results = [inline_result(query)] if query else []
+            results = [inline_result(query, self.name)] if query else []
         self.call("answerInlineQuery", inline_query_id=q["id"], results=results,
                   cache_time=0, is_personal=True)
 
@@ -120,7 +121,7 @@ class Bot:
         return p.stdout
 
     def on_callback(self, c):
-        self.call("answerCallbackQuery", callback_query_id=c["id"], text="pi is still thinking…")
+        self.call("answerCallbackQuery", callback_query_id=c["id"], text=f"{self.name} is still thinking…")
 
     def run(self):
         me = self.call("getMe")
@@ -161,6 +162,7 @@ def main():
         pi_timeout=int(os.environ.get("PI_TIMEOUT", "180")),
         pi_cwd=os.environ.get("PI_CWD") or os.path.expanduser("~"),
         max_jobs=int(os.environ.get("PI_MAX_JOBS", "2")),
+        name=os.environ.get("ASSISTANT_NAME") or "pi",
     ).run()
 
 

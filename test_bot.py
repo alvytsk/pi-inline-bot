@@ -18,12 +18,19 @@ class InlineResultTest(unittest.TestCase):
     def test_result_has_placeholder_and_button(self):
         r = bot.inline_result("what is uptime?")
         self.assertEqual(r["type"], "article")
+        self.assertEqual(r["title"], "Ask pi")
         self.assertLessEqual(len(r["id"].encode()), 64)
         self.assertIn("what is uptime?", r["input_message_content"]["message_text"])
         self.assertEqual(r["input_message_content"]["message_text"],
                          "💬 what is uptime?\n\n🤖 thinking…")
         # Without an inline keyboard Telegram does not send inline_message_id.
         self.assertTrue(r["reply_markup"]["inline_keyboard"][0])
+        self.assertEqual(r["reply_markup"]["inline_keyboard"][0][0]["text"], "🤖 pi is thinking…")
+
+    def test_assistant_name_is_used_in_title_and_button(self):
+        r = bot.inline_result("q", name="Jeeves")
+        self.assertEqual(r["title"], "Ask Jeeves")
+        self.assertEqual(r["reply_markup"]["inline_keyboard"][0][0]["text"], "🤖 Jeeves is thinking…")
 
     def test_same_query_gives_same_id(self):
         self.assertEqual(bot.inline_result("a")["id"], bot.inline_result("a")["id"])
